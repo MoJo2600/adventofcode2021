@@ -25,35 +25,49 @@ print(f'epsilon_rate:     {bin(epsilon_rate)}')
 oxygen_generator_rating = 0b0
 co2_scrubber_rating = 0b0
 
-result_count = len(input)
-test = 0b0
-test2 = 0b0
-skip = 0b111111111111
-skip2 = 0b111111111111
 out = input
-out2 = input
-for i in range (0,12):
-    bit_value_at_position = 1 if gamma_rate & (1 << 12-i) else 0
-    test |= (bit_value_at_position << 12-i)
-    skip &= ~(1 << 12-i) | test
-    out = list(filter(lambda reading: reading >= test and reading <= skip, out))
+mask = (1 << 11)
+for i in range(12):
+    ones = len(list(filter(lambda reading: reading & mask, out)))
+    more_ones = ones >= (len(out)/2)
+    if more_ones:
+        out = list(
+            filter(lambda reading: not reading & mask, out)
+        )
+    else:
+        out = list(
+            filter(lambda reading: not reading & mask == 0, out)
+        )
+    
     if len(out) == 1:
         print(f'found oxygen_generator_rating: {bin(out[0])} - {out[0]}')
         oxygen_generator_rating = out[0]
+        break
 
-    bit_value_at_position = 1 if epsilon_rate & (1 << 12-i) else 0
+    mask >>= 1
 
+out = input
+mask = (1 << 11)
+for i in range(12):
+    ones = len(list(filter(lambda reading: reading & mask, out)))
+    more_ones = ones >= (len(out)/2)
+    if more_ones:
+        out = list(
+            filter(lambda reading: not reading & mask == 0, out)
+        )
+    else:
+        out = list(
+            filter(lambda reading: not reading & mask, out)
+        )
+    
+    if len(out) == 1:
+        print(f'found co2_scrubber_rating: {bin(out[0])} - {out[0]}')
+        co2_scrubber_rating = out[0]
+        break
 
+    mask >>= 1
 
-
-    test2 |= (bit_value_at_position << 12-i)
-    skip2 &= ~(1 << 12-i) | test2
-    out2 = list(filter(lambda reading: reading <= test2 and reading >= skip2, out2))
-    if len(out2) == 1:
-        print(f'found co2_scrubber_rating: {bin(out2[0])} - {out2[0]}')
-        co2_scrubber_rating = out2[0]
 
 print(f'oxygen_generator_rating: {oxygen_generator_rating}')
-print(f'co2_scrubber_rating: {oxygen_generator_rating}')
-
-print(f'Result: {oxygen_generator_rating*oxygen_generator_rating}')
+print(f'co2_scrubber_rating: {co2_scrubber_rating}')
+print(f'Result: {oxygen_generator_rating*co2_scrubber_rating}')
